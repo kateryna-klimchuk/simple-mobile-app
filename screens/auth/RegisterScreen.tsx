@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,7 +11,19 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 
+const initialState = {
+  name: "",
+  email: "",
+  password: "",
+};
 export const RegisterScreen = ({ navigation }: any) => {
+  const [userData, setUserData] = useState(initialState);
+
+  const onFormSubmit = () => {
+    console.log(userData);
+    setUserData(initialState);
+    navigation.navigate("Home", { name: userData.name });
+  };
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
@@ -26,19 +39,45 @@ export const RegisterScreen = ({ navigation }: any) => {
           <View style={styles.form}>
             <View>
               <Text style={{ paddingBottom: 4 }}>Full name</Text>
-              <TextInput style={styles.input} />
+              <TextInput
+                style={styles.input}
+                value={userData.name}
+                onChangeText={(value) =>
+                  setUserData((prevState) => ({ ...prevState, name: value }))
+                }
+              />
             </View>
             <View>
               <Text style={{ paddingBottom: 4, paddingTop: 8 }}>
                 Email address
               </Text>
-              <TextInput style={styles.input} />
+              <TextInput
+                style={styles.input}
+                value={userData.email}
+                onChangeText={(value) =>
+                  setUserData((prevState) => ({ ...prevState, email: value }))
+                }
+              />
             </View>
             <View>
               <Text style={{ paddingBottom: 4, paddingTop: 8 }}>Password</Text>
-              <TextInput style={styles.input} secureTextEntry={true} />
+              <TextInput
+                style={styles.input}
+                secureTextEntry={true}
+                value={userData.password}
+                onChangeText={(value) =>
+                  setUserData((prevState) => ({
+                    ...prevState,
+                    password: value,
+                  }))
+                }
+              />
             </View>
-            <TouchableOpacity style={styles.button} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.button}
+              activeOpacity={0.8}
+              onPress={onFormSubmit}
+            >
               <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}>
                 Sign up
               </Text>
@@ -46,7 +85,7 @@ export const RegisterScreen = ({ navigation }: any) => {
             <View
               style={{
                 marginTop: 10,
-                marginBottom: 40,
+                marginBottom: 20,
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
@@ -102,6 +141,7 @@ const styles = StyleSheet.create({
   },
   form: {
     width: 320,
+    marginBottom: 110,
   },
   input: {
     height: 40,

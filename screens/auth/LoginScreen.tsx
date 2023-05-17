@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,7 +11,19 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 
+const initialState = {
+  email: "",
+  password: "",
+};
+
 export const LoginScreen = ({ navigation, route }: any) => {
+  const [userData, setUserData] = useState(initialState);
+
+  const onFormSubmit = () => {
+    console.log(userData);
+    setUserData(initialState);
+    navigation.navigate("Home");
+  };
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
@@ -28,14 +41,33 @@ export const LoginScreen = ({ navigation, route }: any) => {
               <Text style={{ paddingBottom: 4, paddingTop: 8 }}>
                 Email address
               </Text>
-              <TextInput style={styles.input} />
+              <TextInput
+                style={styles.input}
+                value={userData.email}
+                onChangeText={(value) =>
+                  setUserData((prevState) => ({ ...prevState, email: value }))
+                }
+              />
             </View>
             <View>
               <Text style={{ paddingBottom: 4, paddingTop: 8 }}>Password</Text>
-              <TextInput style={styles.input} secureTextEntry={true} />
+              <TextInput
+                style={styles.input}
+                secureTextEntry={true}
+                value={userData.password}
+                onChangeText={(value) =>
+                  setUserData((prevState) => ({
+                    ...prevState,
+                    password: value,
+                  }))
+                }
+              />
             </View>
             <TouchableOpacity style={styles.button} activeOpacity={0.8}>
-              <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}>
+              <Text
+                style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}
+                onPress={onFormSubmit}
+              >
                 Sign in
               </Text>
             </TouchableOpacity>
@@ -59,6 +91,7 @@ const styles = StyleSheet.create({
   },
   form: {
     width: 320,
+    marginBottom: 130,
   },
   input: {
     height: 40,
