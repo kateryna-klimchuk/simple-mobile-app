@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,19 +11,41 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 
+import { Dimensions } from "react-native";
+
 const initialState = {
   name: "",
   email: "",
   password: "",
 };
+
+const windowDimensions = Dimensions.get("window");
+const screenDimensions = Dimensions.get("screen");
+
 export const RegisterScreen = ({ navigation }: any) => {
   const [userData, setUserData] = useState(initialState);
+
+  const [dimensions, setDimensions] = useState({
+    window: windowDimensions,
+    screen: screenDimensions,
+  });
+
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener(
+      "change",
+      ({ window, screen }) => {
+        setDimensions({ window, screen });
+      }
+    );
+    return () => subscription?.remove();
+  });
 
   const onFormSubmit = () => {
     console.log(userData);
     setUserData(initialState);
     navigation.navigate("Home", { name: userData.name });
   };
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
@@ -31,14 +53,21 @@ export const RegisterScreen = ({ navigation }: any) => {
           behavior={Platform.OS == "ios" ? "padding" : "height"}
         >
           <Text
-            style={{ paddingBottom: 20, fontSize: 20, alignSelf: "center" }}
+            style={{
+              paddingBottom: 20,
+              fontSize: 20,
+              alignSelf: "center",
+              fontFamily: "Lora-regular",
+            }}
           >
             Registration
           </Text>
 
           <View style={styles.form}>
             <View>
-              <Text style={{ paddingBottom: 4 }}>Full name</Text>
+              <Text style={{ paddingBottom: 4, fontFamily: "Lora-regular" }}>
+                Full name
+              </Text>
               <TextInput
                 style={styles.input}
                 value={userData.name}
@@ -48,7 +77,13 @@ export const RegisterScreen = ({ navigation }: any) => {
               />
             </View>
             <View>
-              <Text style={{ paddingBottom: 4, paddingTop: 8 }}>
+              <Text
+                style={{
+                  paddingBottom: 4,
+                  paddingTop: 8,
+                  fontFamily: "Lora-regular",
+                }}
+              >
                 Email address
               </Text>
               <TextInput
@@ -60,7 +95,15 @@ export const RegisterScreen = ({ navigation }: any) => {
               />
             </View>
             <View>
-              <Text style={{ paddingBottom: 4, paddingTop: 8 }}>Password</Text>
+              <Text
+                style={{
+                  paddingBottom: 4,
+                  paddingTop: 8,
+                  fontFamily: "Lora-regular",
+                }}
+              >
+                Password
+              </Text>
               <TextInput
                 style={styles.input}
                 secureTextEntry={true}
@@ -78,7 +121,13 @@ export const RegisterScreen = ({ navigation }: any) => {
               activeOpacity={0.8}
               onPress={onFormSubmit}
             >
-              <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}>
+              <Text
+                style={{
+                  color: "#fff",
+                  fontSize: 16,
+                  fontFamily: "Lora-bold",
+                }}
+              >
                 Sign up
               </Text>
             </TouchableOpacity>
@@ -95,6 +144,7 @@ export const RegisterScreen = ({ navigation }: any) => {
                 style={{
                   fontSize: 16,
                   marginRight: 6,
+                  fontFamily: "Lora-regular",
                 }}
               >
                 Already signed up?
@@ -104,6 +154,7 @@ export const RegisterScreen = ({ navigation }: any) => {
                   color: "#483d8b",
                   fontSize: 16,
                   textDecorationLine: "underline",
+                  fontFamily: "Lora-regular",
                 }}
                 onPress={() => navigation.navigate("Login")}
               >
@@ -116,6 +167,7 @@ export const RegisterScreen = ({ navigation }: any) => {
                 fontSize: 16,
                 textDecorationLine: "underline",
                 alignSelf: "center",
+                fontFamily: "Lora-regular",
               }}
               onPress={() => navigation.navigate("Home")}
             >
