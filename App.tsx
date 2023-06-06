@@ -1,13 +1,8 @@
 import React, { useState } from "react";
-import { LoginScreen } from "./screens/auth/LoginScreen";
-import { RegisterScreen } from "./screens/auth/RegisterScreen";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { HomeScreen } from "./screens/HomeScreen";
 import * as Font from "expo-font";
 import AppLoading from "expo-app-loading";
-
-const MainStack = createNativeStackNavigator();
+import { useRoute } from "./router";
 
 const customFonts = {
   "Lora-regular": require("./assets/fonts/Lora-Regular.ttf"),
@@ -22,6 +17,7 @@ const loadApplication = async () => {
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
+  const routing = useRoute(true);
   if (!isReady) {
     return (
       <AppLoading
@@ -32,21 +28,5 @@ export default function App() {
     );
   }
 
-  return (
-    <NavigationContainer>
-      <MainStack.Navigator>
-        <MainStack.Screen
-          name="Registration"
-          component={RegisterScreen}
-          options={{ title: "" }}
-        />
-        <MainStack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ title: "" }}
-        />
-        <MainStack.Screen name="Home" component={HomeScreen} />
-      </MainStack.Navigator>
-    </NavigationContainer>
-  );
+  return <NavigationContainer>{routing}</NavigationContainer>;
 }
