@@ -1,131 +1,48 @@
-// import React, { useRef, useState } from "react";
-
-// import { Text, View, StyleSheet, TouchableOpacity, Image } from "react-native";
-// import { Camera, CameraType } from "expo-camera";
-
-// export const CreateScreen = ({ navigation }: any) => {
-//   const [photo, setPhoto] = useState(null);
-//   const [type, setType] = useState(CameraType.back);
-
-//   const [isCameraReady, setIsCameraReady] = useState(false);
-
-//   const toggleCameraType = () => {
-//     setType((current) =>
-//       current === CameraType.back ? CameraType.front : CameraType.back
-//     );
-//   };
-
-//   const onCameraReady = () => {
-//     setIsCameraReady(true);
-//   };
-
-//   const ref = useRef(null);
-//   const getPhoto = async () => {
-//     const data = await ref?.current?.takePictureAsync(null);
-//     setPhoto(data.uri);
-//     toggleCameraType();
-//   };
-
-//   const sendPhoto = () => {
-//     console.log("navigation ===>", navigation);
-//     navigation.navigate("Posts", { photo });
-//     setPhoto(null);
-//   };
-//   return (
-//     <View style={styles.container}>
-//       <Camera
-//         style={styles.camera}
-//         ref={ref}
-//         type={type}
-//         onCameraReady={onCameraReady}
-//       >
-//         {photo && (
-//           <View style={styles.photoContainer}>
-//             {/* <Text style={{ color: "red" }}>{photo}</Text> */}
-//             <Image
-//               source={{ uri: photo }}
-//               style={{ width: 100, height: 100 }}
-//             />
-//           </View>
-//         )}
-
-//         <TouchableOpacity onPress={getPhoto} style={styles.snapContainer}>
-//           <TouchableOpacity onPress={getPhoto} style={styles.clickContainer} />
-//         </TouchableOpacity>
-//       </Camera>
-//       <View>
-//         <TouchableOpacity onPress={sendPhoto} style={styles.sendContainer}>
-//           <Text style={styles.publishBtn}>Publish</Text>
-//         </TouchableOpacity>
-//       </View>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//   },
-//   camera: {
-//     height: "70%",
-//     alignItems: "center",
-//     justifyContent: "flex-end",
-//   },
-//   snap: {
-//     color: "#fff",
-//   },
-//   snapContainer: {
-//     borderWidth: 1,
-//     borderColor: "#fff",
-//     width: 70,
-//     height: 70,
-//     borderRadius: 50,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     marginBottom: 6,
-//     backgroundColor: "#e7e5e7",
-//   },
-//   clickContainer: {
-//     borderWidth: 2,
-//     borderColor: "#999a9a",
-//     width: 50,
-//     height: 50,
-//     borderRadius: 50,
-//   },
-//   photoContainer: {
-//     position: "absolute",
-//     top: 20,
-//     left: 10,
-//     borderWidth: 1,
-//     borderColor: "#fff",
-//   },
-//   sendContainer: {
-//     backgroundColor: "#ff8c00",
-//     borderRadius: 4,
-//     width: 170,
-//     height: 40,
-//     alignSelf: "center",
-//     marginTop: 30,
-//     justifyContent: "center",
-//     alignItems: "center",
-//   },
-//   publishBtn: {
-//     fontFamily: "Lora-bold",
-//     color: "#fff",
-//   },
-// });
-
-import React, { useState, useEffect, useRef } from "react";
-import { Text, View, Image, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  Text,
+  TextInput,
+  View,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Keyboard,
+  Platform,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { Camera, CameraType } from "expo-camera";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as MediaLibrary from "expo-media-library";
+import { AntDesign } from "@expo/vector-icons";
+import * as Location from "expo-location";
+
+const initialState = {
+  photo: "",
+  description: "",
+  location: null,
+};
 
 export const CreateScreen = ({ navigation }: any) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraRef, setCameraRef] = useState(null);
   const [type, setType] = useState(CameraType.back);
   const [photo, setPhoto] = useState(null);
+  const [post, setPost] = useState(initialState);
+  const [cameraStatus, setCameraStatus] = useState(false);
+
+  const [location, setLocation] = useState({});
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+    })();
+  }, []);
 
   const takePhoto = async () => {
     if (cameraRef) {
@@ -133,12 +50,27 @@ export const CreateScreen = ({ navigation }: any) => {
       setPhoto(uri);
 
       await MediaLibrary.createAssetAsync(uri);
+
+      const userLocation = await Location.getCurrentPositionAsync({});
+
+      setPost((prevState) => ({
+        ...prevState,
+        photo: uri,
+      }));
+      setLocation(userLocation);
     }
   };
 
-  const sendPhoto = () => {
-    navigation.navigate("Posts", { photo });
+  const sendPost = () => {
+    navigation.navigate("DefaultScreen", { ...post, location });
     setPhoto(null);
+    setPost(initialState);
+    setLocation({});
+  };
+
+  const deletePost = () => {
+    setPhoto(null);
+    setLocation({});
   };
 
   useEffect(() => {
@@ -158,53 +90,86 @@ export const CreateScreen = ({ navigation }: any) => {
   }
 
   return (
-    <View style={styles.container}>
-      <Camera
-        style={styles.camera}
-        type={type}
-        ref={(ref) => {
-          setCameraRef(ref);
-        }}
-      >
-        {photo && (
-          <View style={styles.photoContainer}>
-            <Image
-              source={{ uri: photo }}
-              style={{ width: 200, height: 200 }}
-            />
-          </View>
-        )}
-        <View style={styles.photoView}>
-          <TouchableOpacity
-            style={styles.flipContainer}
-            onPress={() => {
-              setType(
-                type === CameraType.back ? CameraType.front : CameraType.back
-              );
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS == "ios" ? "padding" : undefined}
+        >
+          <Camera
+            style={styles.camera}
+            type={type}
+            ref={(ref) => {
+              setCameraRef(ref);
             }}
           >
-            <MaterialIcons name="flip-camera-ios" size={28} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={takePhoto}>
-            <View style={styles.takePhotoOut}>
-              <View style={styles.takePhotoInner} />
+            {photo && (
+              <View style={styles.photoContainer}>
+                <Image
+                  source={{ uri: photo }}
+                  style={{ width: 200, height: 200 }}
+                />
+              </View>
+            )}
+            <View style={styles.photoView}>
+              <TouchableOpacity
+                style={styles.flipContainer}
+                onPress={() => {
+                  setType(
+                    type === CameraType.back
+                      ? CameraType.front
+                      : CameraType.back
+                  );
+                }}
+              >
+                <MaterialIcons name="flip-camera-ios" size={28} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={takePhoto}>
+                <View style={styles.takePhotoOut}>
+                  <View style={styles.takePhotoInner} />
+                </View>
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
-        </View>
-      </Camera>
-      <View>
-        <TouchableOpacity onPress={sendPhoto} style={styles.sendContainer}>
-          <Text style={styles.publishBtn}>Publish</Text>
-        </TouchableOpacity>
+          </Camera>
+          <View>
+            <TextInput
+              style={styles.input}
+              placeholder={"Description"}
+              value={post.description}
+              onChangeText={(value) =>
+                setPost((prevState) => ({ ...prevState, description: value }))
+              }
+            />
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <TouchableOpacity onPress={sendPost} style={styles.sendContainer}>
+                <Text style={styles.publishBtn}>Publish</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteContainer}
+                onPress={deletePost}
+              >
+                <Text style={styles.publishBtn}>
+                  <AntDesign name="delete" size={22} color="black" />
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: "#fff" },
   camera: {
-    height: "80%",
+    height: "75%",
     justifyContent: "flex-end",
   },
   photoView: {
@@ -252,7 +217,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     width: 170,
     height: 40,
-    alignSelf: "center",
     marginTop: 30,
     justifyContent: "center",
     alignItems: "center",
@@ -260,5 +224,23 @@ const styles = StyleSheet.create({
   publishBtn: {
     fontFamily: "Lora-bold",
     color: "#fff",
+  },
+  deleteContainer: {
+    borderRadius: 4,
+    width: 70,
+    height: 40,
+    marginTop: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#d3d3d3",
+    marginLeft: 10,
+  },
+  input: {
+    borderBottomWidth: 1,
+    marginTop: 10,
+    borderColor: "#d3d3d3",
+    height: 30,
+    width: "90%",
+    alignSelf: "center",
   },
 });
