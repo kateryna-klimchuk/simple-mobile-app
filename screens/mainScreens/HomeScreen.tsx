@@ -4,42 +4,175 @@ import {
   View,
   Keyboard,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
+
+import { Button, Input } from "react-native-elements";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { PostsScreen } from "./PostsScreen";
 import { CreateScreen } from "./CreateScreen";
 import { ProfileScreen } from "./ProfileScreen";
+import { supabase } from "../../supabase";
+import { Session } from "@supabase/supabase-js";
+import { useState, useEffect } from "react";
 
 const Tab = createBottomTabNavigator();
 
-export const HomeScreen = ({ navigation, route }: any) => {
+export const HomeScreen = (
+  // { navigation, route }: any,
+  { session }: { session: Session }
+) => {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState("");
+  const [website, setWebsite] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+
+  const getUser = async () => {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error("No user on the session!");
+
+      let { data, error, status } = await supabase
+        .from("profiles")
+        .select(`username, website, avatar_url`)
+        .eq("id", session?.user.id)
+        .single();
+      if (error && status !== 406) {
+        throw error;
+      }
+      console.log("data ===>", data);
+
+      if (data) {
+        setUsername(data.username);
+        setWebsite(data.website);
+        setAvatarUrl(data.avatar_url);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (session) getUser();
+  }, [session]);
+  console.log("session==>", session);
+
+  // async function getProfile() {
+  //   try {
+  //     setLoading(true);
+  //     if (!session?.user) throw new Error("No user on the session!");
+
+  //     let { data, error, status } = await supabase
+  //       .from("profiles")
+  //       .select(`username, website, avatar_url`)
+  //       .eq("id", session?.user.id)
+  //       .single();
+  //     if (error && status !== 406) {
+  //       throw error;
+  //     }
+
+  //     if (data) {
+  //       setUsername(data.username);
+  //       setWebsite(data.website);
+  //       setAvatarUrl(data.avatar_url);
+  //     }
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       Alert.alert(error.message);
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
+
+  // async function updateProfile({
+  //   username,
+  //   website,
+  //   avatar_url,
+  // }: {
+  //   username: string;
+  //   website: string;
+  //   avatar_url: string;
+  // }) {
+  //   try {
+  //     setLoading(true);
+  //     if (!session?.user) throw new Error("No user on the session!");
+
+  //     const updates = {
+  //       id: session?.user.id,
+  //       username,
+  //       website,
+  //       avatar_url,
+  //       updated_at: new Date(),
+  //     };
+
+  //     let { error } = await supabase.from("profiles").upsert(updates);
+
+  //     if (error) {
+  //       throw error;
+  //     }
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       Alert.alert(error.message);
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
+
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View style={styles.container}>
-        {/* <Text style={styles.text}>
-          {route.params?.name
-            ? ` Hello, ${route.params.name}, glad you're here!`
-            : " Hi, glad you're here!"}
-        </Text> */}
-        <Tab.Navigator>
-          <Tab.Screen name="Posts" component={PostsScreen} />
-          <Tab.Screen name="Create" component={CreateScreen} />
-          <Tab.Screen name="Profile" component={ProfileScreen} />
-        </Tab.Navigator>
+    <View style={styles.container}>
+      <View style={[styles.verticallySpaced, styles.mt20]}>
+        <Input label="Email" value={session?.user?.email} disabled />
       </View>
-    </TouchableWithoutFeedback>
+      <View style={styles.verticallySpaced}>
+        <Input
+          label="Username"
+          value={username || ""}
+          onChangeText={(text) => setUsername(text)}
+        />
+      </View>
+      <View style={styles.verticallySpaced}>
+        <Input
+          label="Website"
+          value={website || ""}
+          onChangeText={(text) => setWebsite(text)}
+        />
+      </View>
+
+      {/* <View style={[styles.verticallySpaced, styles.mt20]}>
+        <Button
+          title={loading ? "Loading ..." : "Update"}
+          onPress={() =>
+            updateProfile({ username, website, avatar_url: avatarUrl })
+          }
+          disabled={loading}
+        />
+      </View> */}
+
+      <View style={styles.verticallySpaced}>
+        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    marginTop: 40,
+    padding: 12,
   },
-  text: {
-    fontSize: 22,
-    marginTop: 10,
+  verticallySpaced: {
+    paddingTop: 4,
+    paddingBottom: 4,
+    alignSelf: "stretch",
+  },
+  mt20: {
+    marginTop: 20,
   },
 });

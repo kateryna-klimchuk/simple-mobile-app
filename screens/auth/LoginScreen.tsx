@@ -9,8 +9,9 @@ import {
   Keyboard,
   Platform,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
-
+import { supabase } from "../../supabase";
 const initialState = {
   email: "",
   password: "",
@@ -18,11 +19,17 @@ const initialState = {
 
 export const LoginScreen = ({ navigation, route }: any) => {
   const [userData, setUserData] = useState(initialState);
+  const [loading, setLoading] = useState(false);
+  const signInWithEmail = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: userData.email,
+      password: userData.password,
+    });
 
-  const onFormSubmit = () => {
-    console.log(userData);
-    setUserData(initialState);
-    navigation.navigate("Home");
+    if (error) Alert.alert(error.message);
+    setLoading(false);
+    navigation.navigate("Posts");
   };
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -47,6 +54,7 @@ export const LoginScreen = ({ navigation, route }: any) => {
                 onChangeText={(value) =>
                   setUserData((prevState) => ({ ...prevState, email: value }))
                 }
+                autoCapitalize={"none"}
               />
             </View>
             <View>
@@ -61,12 +69,17 @@ export const LoginScreen = ({ navigation, route }: any) => {
                     password: value,
                   }))
                 }
+                autoCapitalize={"none"}
               />
             </View>
-            <TouchableOpacity style={styles.button} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.button}
+              activeOpacity={0.8}
+              disabled={loading}
+            >
               <Text
                 style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}
-                onPress={onFormSubmit}
+                onPress={() => signInWithEmail()}
               >
                 Sign in
               </Text>

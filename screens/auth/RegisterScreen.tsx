@@ -9,21 +9,19 @@ import {
   Keyboard,
   Platform,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
-
+import { supabase } from "../../supabase";
 import { Dimensions } from "react-native";
-
-const initialState = {
-  name: "",
-  email: "",
-  password: "",
-};
 
 const windowDimensions = Dimensions.get("window");
 const screenDimensions = Dimensions.get("screen");
 
 export const RegisterScreen = ({ navigation }: any) => {
-  const [userData, setUserData] = useState(initialState);
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
   const [dimensions, setDimensions] = useState({
     window: windowDimensions,
@@ -40,10 +38,19 @@ export const RegisterScreen = ({ navigation }: any) => {
     return () => subscription?.remove();
   });
 
-  const onFormSubmit = () => {
-    console.log(userData);
-    setUserData(initialState);
-    navigation.navigate("Home", { name: userData.name });
+  const signUpWithEmail = async () => {
+    setLoading(true);
+    const { error, data } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    });
+    console.log("data signup", data);
+
+    if (error) Alert.alert(error.message);
+    setLoading(false);
+    console.log(navigation);
+
+    navigation.navigate("Posts");
   };
 
   return (
@@ -70,10 +77,8 @@ export const RegisterScreen = ({ navigation }: any) => {
               </Text>
               <TextInput
                 style={styles.input}
-                value={userData.name}
-                onChangeText={(value) =>
-                  setUserData((prevState) => ({ ...prevState, name: value }))
-                }
+                value={name}
+                onChangeText={(value) => setName(value)}
               />
             </View>
             <View>
@@ -88,10 +93,9 @@ export const RegisterScreen = ({ navigation }: any) => {
               </Text>
               <TextInput
                 style={styles.input}
-                value={userData.email}
-                onChangeText={(value) =>
-                  setUserData((prevState) => ({ ...prevState, email: value }))
-                }
+                value={email}
+                onChangeText={(value) => setEmail(value)}
+                autoCapitalize={"none"}
               />
             </View>
             <View>
@@ -107,19 +111,16 @@ export const RegisterScreen = ({ navigation }: any) => {
               <TextInput
                 style={styles.input}
                 secureTextEntry={true}
-                value={userData.password}
-                onChangeText={(value) =>
-                  setUserData((prevState) => ({
-                    ...prevState,
-                    password: value,
-                  }))
-                }
+                value={password}
+                onChangeText={(value) => setPassword(value)}
+                autoCapitalize={"none"}
               />
             </View>
             <TouchableOpacity
               style={styles.button}
               activeOpacity={0.8}
-              onPress={onFormSubmit}
+              disabled={loading}
+              onPress={() => signUpWithEmail()}
             >
               <Text
                 style={{
@@ -161,18 +162,6 @@ export const RegisterScreen = ({ navigation }: any) => {
                 Sign in.
               </Text>
             </View>
-            <Text
-              style={{
-                color: "#ff7f50",
-                fontSize: 16,
-                textDecorationLine: "underline",
-                alignSelf: "center",
-                fontFamily: "Lora-regular",
-              }}
-              onPress={() => navigation.navigate("Home")}
-            >
-              Main page without registration-{">"}
-            </Text>
           </View>
         </KeyboardAvoidingView>
       </View>

@@ -52,7 +52,7 @@ export const useRoute = (isAuth: boolean) => {
     />
   );
 
-  if (!isAuth) {
+  if (isAuth) {
     return (
       <MainStack.Navigator>
         <MainStack.Screen
