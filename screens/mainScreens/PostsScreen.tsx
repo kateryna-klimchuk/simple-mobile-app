@@ -1,228 +1,127 @@
-// import React from "react";
-// import { useEffect } from "react";
-// import { useState } from "react";
-
-// import {
-//   Text,
-//   FlatList,
-//   View,
-//   StyleSheet,
-//   Image,
-//   TouchableOpacity,
-// } from "react-native";
-// import { AntDesign, Entypo, Feather } from "@expo/vector-icons";
-// import { supabase } from "../../lib/supabase";
-// import { Session } from "@supabase/supabase-js";
-
-// import { createNativeStackNavigator } from "@react-navigation/native-stack";
-// import { MapScreen } from "../nestedScreens/MapScreen";
-// import { DefaultScreen } from "../nestedScreens/DefaultScreen";
-// import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-// import { CreateScreen } from "./CreateScreen";
-// import { ProfileScreen } from "./ProfileScreen";
-// const NestedScreen = createNativeStackNavigator();
-// const Tab = createBottomTabNavigator();
-
-// export const PostsScreen = () => {
-//   const postButton = (props: {
-//     focused: boolean;
-//     color: string;
-//     size: number;
-//   }) => (
-//     <AntDesign
-//       name="picture"
-//       size={props.size}
-//       color={props.color}
-//       focused={props.focused}
-//     />
-//   );
-//   const createButton = (props: {
-//     focused: boolean;
-//     color: string;
-//     size: number;
-//   }) => (
-//     <AntDesign
-//       name="plussquareo"
-//       size={props.size}
-//       color={props.color}
-//       focused={props.focused}
-//     />
-//   );
-//   const userButton = (props: {
-//     focused: boolean;
-//     color: string;
-//     size: number;
-//   }) => (
-//     <Feather
-//       name="user"
-//       size={props.size}
-//       color={props.color}
-//       focused={props.focused}
-//     />
-//   );
-//   return (
-//     <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
-//       <Tab.Screen
-//         name="Posts"
-//         component={PostsScreen}
-//         options={{
-//           tabBarIcon: (props) => postButton(props),
-//         }}
-//       />
-//       <Tab.Screen
-//         name="Create"
-//         component={CreateScreen}
-//         options={{
-//           tabBarIcon: (props) => createButton(props),
-//         }}
-//       />
-//       <Tab.Screen
-//         name="Profile"
-//         component={ProfileScreen}
-//         options={{
-//           tabBarIcon: (props) => userButton(props),
-//         }}
-//       />
-//     </Tab.Navigator>
-//     // <NestedScreen.Navigator>
-//     //   <NestedScreen.Screen
-//     //     name="DefaultScreen"
-//     //     component={DefaultScreen}
-//     //     options={{ headerShown: false }}
-//     //   />
-//     //   <NestedScreen.Screen name="Map" component={MapScreen} />
-//     // </NestedScreen.Navigator>
-//   );
-// };
-
-import { useState, useEffect } from "react";
-import { supabase } from "../../supabase";
-import { StyleSheet, View, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, View, Text, Image } from "react-native";
 import { Button, Input } from "react-native-elements";
-import { Session } from "@supabase/supabase-js";
+import { AntDesign } from "@expo/vector-icons";
+import * as Location from "expo-location";
+import { z } from "zod";
 
-export const PostsScreen = (session: Session) => {
-  const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState("");
-  const [website, setWebsite] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
+const locationSchema = z.object({
+  latitude: z.number(),
+  longitude: z.number(),
+});
+export const PostsScreen = () => {
+  const [weather, setWeather] = useState(null);
+  const [location, setLocation] = useState<typeof locationSchema>();
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (session) getProfile();
-  }, [session]);
-
-  async function getProfile() {
-    try {
-      setLoading(true);
-      if (!session?.user) throw new Error("No user on the session!");
-
-      let { data, error, status } = await supabase
-        .from("profiles")
-        .select(`username, website, avatar_url`)
-        .eq("id", session?.user.id)
-        .single();
-      if (error && status !== 406) {
-        throw error;
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
       }
-      console.log(data);
+    })();
+  }, []);
 
-      if (data) {
-        setUsername(data.username);
-        setWebsite(data.website);
-        setAvatarUrl(data.avatar_url);
+  const getLocation = async () => {
+    const userLocation = await Location.getCurrentPositionAsync({});
+    console.log(userLocation.coords);
+  };
+
+  const locat = getLocation();
+
+  // const searchParams = "duizel";
+  // const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${searchParams}`;
+  const options = {
+    method: "GET",
+    headers: {
+      "X-RapidAPI-Key": "3bb54b3294mshf5c7331d95313f0p183ec3jsnabe01beb2a16",
+      "X-RapidAPI-Host": "weatherapi-com.p.rapidapi.com",
+    },
+  };
+
+  useEffect(() => {
+    const getWeatherData = async () => {
+      try {
+        const userLocation = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = userLocation.coords;
+        const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${latitude}, ${longitude}`;
+
+        const response = await fetch(url, options);
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        console.error(error);
+        return error;
       }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function updateProfile({
-    username,
-    website,
-    avatar_url,
-  }: {
-    username: string;
-    website: string;
-    avatar_url: string;
-  }) {
-    try {
-      setLoading(true);
-      if (!session?.user) throw new Error("No user on the session!");
-
-      const updates = {
-        id: session?.user.id,
-        username,
-        website,
-        avatar_url,
-        updated_at: new Date(),
-      };
-
-      let { error } = await supabase.from("profiles").upsert(updates);
-
-      if (error) {
-        throw error;
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
+    };
+    getWeatherData().then(setWeather);
+  }, []);
 
   return (
     <View style={styles.container}>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input label="Email" value={session?.user?.email} disabled />
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Input
-          label="Username"
-          value={username || ""}
-          onChangeText={(text) => setUsername(text)}
-        />
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Input
-          label="Website"
-          value={website || ""}
-          onChangeText={(text) => setWebsite(text)}
-        />
-      </View>
-
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button
-          title={loading ? "Loading ..." : "Update"}
-          onPress={() =>
-            updateProfile({ username, website, avatar_url: avatarUrl })
-          }
-          disabled={loading}
-        />
-      </View>
-
-      <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
-      </View>
+      {weather ? (
+        <>
+          <Image
+            style={{ width: 220, height: 100, marginTop: 100 }}
+            source={{
+              uri: "https://cdn.weatherapi.com/v4/images/weatherapi_logo.png",
+            }}
+          />
+          <View
+            style={{
+              flexDirection: "row",
+              columnGap: 4,
+              marginTop: 60,
+              width: 300,
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text style={{ fontSize: 24 }}>{weather.location.name},</Text>
+            <Text style={{ fontSize: 24 }}>{weather.location.country}</Text>
+          </View>
+          <Image
+            style={{
+              borderColor: "red",
+              width: 120,
+              height: 120,
+              marginTop: 10,
+            }}
+            source={{
+              uri: `https:${weather?.["current"]?.["condition"].icon}`,
+            }}
+          />
+          <Text style={{ fontSize: 50 }}>{`${weather.current?.temp_c} C`}</Text>
+          <Text>{weather.current?.condition.text}</Text>
+          <Text>{`Wind: ${weather.current.wind_kph} k/h`}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              marginTop: 170,
+              justifyContent: "center",
+              alignItems: "center",
+              columnGap: 10,
+            }}
+          >
+            <Text style={{}}>Change location? Press</Text>
+            <AntDesign name="plussquareo" size={24} color="gray" />
+          </View>
+        </>
+      ) : (
+        <Text>Nothing to show</Text>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 40,
-    padding: 12,
-  },
-  verticallySpaced: {
-    paddingTop: 4,
-    paddingBottom: 4,
-    alignSelf: "stretch",
-  },
-  mt20: {
-    marginTop: 20,
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    marginTop: 10,
   },
 });
