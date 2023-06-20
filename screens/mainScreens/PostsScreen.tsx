@@ -14,15 +14,15 @@ export const PostsScreen = () => {
   const [location, setLocation] = useState<typeof locationSchema>();
   const [errorMsg, setErrorMsg] = useState("");
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== "granted") {
+  //       setErrorMsg("Permission to access location was denied");
+  //       return;
+  //     }
+  //   })();
+  // }, []);
 
   const getLocation = async () => {
     const userLocation = await Location.getCurrentPositionAsync({});
@@ -44,7 +44,14 @@ export const PostsScreen = () => {
   useEffect(() => {
     const getWeatherData = async () => {
       try {
+        // let { status } = await Location.requestForegroundPermissionsAsync();
+        // if (status !== "granted") {
+        //   setErrorMsg("Permission to access location was denied");
+        //   return;
+        // }
         const userLocation = await Location.getCurrentPositionAsync({});
+        console.log("userLocation", userLocation);
+
         const { latitude, longitude } = userLocation.coords;
         const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${latitude}, ${longitude}`;
 

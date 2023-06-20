@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import * as Location from "expo-location";
+// import * as Location from "expo-location";
 import { Entypo } from "@expo/vector-icons";
 import {
   Text,
@@ -17,24 +17,25 @@ export const ProfileScreen = () => {
   const [weather, setWeather] = useState("");
   const [value, setValue] = useState("");
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== "granted") {
+  //       setErrorMsg("Permission to access location was denied");
+  //       return;
+  //     }
+  //   })();
+  // }, []);
 
   const getLocationWeather = () => {
     setValue(location);
     console.log(value);
+  };
 
+  useEffect(() => {
     const getWeatherData = async () => {
       try {
-        // const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${value}`;
-        const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=rome`;
+        const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${value}`;
 
         const options = {
           method: "GET",
@@ -46,7 +47,6 @@ export const ProfileScreen = () => {
         };
         const response = await fetch(url, options);
         const result = await response.json();
-        console.log("result", result);
         return result;
       } catch (error) {
         console.error(error);
@@ -55,68 +55,97 @@ export const ProfileScreen = () => {
     };
     getWeatherData().then(setWeather);
     setLocation("");
-  };
-
-  console.log(weather);
+  }, [value]);
 
   return (
     <View style={styles.container}>
-      {weather ? (
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "flex-start",
-            marginTop: 10,
-          }}
-        >
-          <Image
-            style={{ width: 220, height: 100, marginTop: 100 }}
-            source={{
-              uri: "https://cdn.weatherapi.com/v4/images/weatherapi_logo.png",
-            }}
-          />
+      {!weather.error ? (
+        <>
           <View
             style={{
-              flexDirection: "row",
-              columnGap: 4,
-              marginTop: 60,
-              width: 300,
-              flexWrap: "wrap",
+              flex: 1,
               alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ fontSize: 24 }}>{weather.location.name},</Text>
-            <Text style={{ fontSize: 24 }}>{weather.location.country}</Text>
-          </View>
-          <Image
-            style={{
-              borderColor: "red",
-              width: 120,
-              height: 120,
+              justifyContent: "flex-start",
               marginTop: 10,
             }}
-            source={{
-              uri: `https:${weather?.["current"]?.["condition"].icon}`,
-            }}
-          />
-          <Text style={{ fontSize: 50 }}>{`${weather.current?.temp_c} C`}</Text>
-          <Text>{weather.current?.condition.text}</Text>
-          <Text>{`Wind: ${weather.current.wind_kph} k/h`}</Text>
-          {/* <View
-            style={{
-              flexDirection: "row",
-              marginTop: 170,
-              justifyContent: "center",
-              alignItems: "center",
-              columnGap: 10,
-            }}
           >
-            <Text style={{}}>Change location? Press</Text>
-            <AntDesign name="plussquareo" size={24} color="gray" />
-          </View> */}
-        </View>
+            <Image
+              style={{ width: 220, height: 100, marginTop: 100 }}
+              source={{
+                uri: "https://cdn.weatherapi.com/v4/images/weatherapi_logo.png",
+              }}
+            />
+
+            <View
+              style={{
+                flexDirection: "row",
+                columnGap: 4,
+                marginTop: 60,
+                width: 300,
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ fontSize: 24 }}>{weather?.location?.name},</Text>
+              <Text style={{ fontSize: 24 }}>{weather?.location?.country}</Text>
+            </View>
+            <Image
+              style={{
+                borderColor: "red",
+                width: 120,
+                height: 120,
+                marginTop: 10,
+              }}
+              source={{
+                uri: `https:${weather?.current?.condition.icon}`,
+              }}
+            />
+            <Text
+              style={{ fontSize: 50 }}
+            >{`${weather.current?.temp_c} C`}</Text>
+            <Text>{weather.current?.condition.text}</Text>
+            <Text>{`Wind: ${weather?.current?.wind_kph} k/h`}</Text>
+          </View>
+          <>
+            <Text
+              style={{
+                paddingBottom: 4,
+                marginLeft: 10,
+                alignSelf: "flex-start",
+              }}
+            >
+              Choose another place:
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                columnGap: 4,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Entypo
+                name="location-pin"
+                size={28}
+                color="#228b22"
+                style={{ marginTop: 16 }}
+              />
+              <TextInput
+                style={styles.input}
+                value={location}
+                autoCapitalize="none"
+                onChangeText={(value) => setLocation(value)}
+              />
+            </View>
+            <TouchableOpacity
+              onPress={getLocationWeather}
+              style={{ ...styles.sendContainer, marginBottom: 10 }}
+            >
+              <Text style={styles.publishBtn}>Search</Text>
+            </TouchableOpacity>
+          </>
+        </>
       ) : (
         <>
           <Image
@@ -150,6 +179,7 @@ export const ProfileScreen = () => {
 
             <TextInput
               style={styles.input}
+              autoCapitalize="none"
               value={location}
               onChangeText={(value) => setLocation(value)}
             />
