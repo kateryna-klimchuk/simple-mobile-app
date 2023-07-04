@@ -4,13 +4,14 @@ import { Button, Input } from "react-native-elements";
 import { AntDesign } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { z } from "zod";
+import { WeatherDataInterface } from "./LocationListScreen";
 
 const locationSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
 });
 export const CurrentLocationScreen = () => {
-  const [weather, setWeather] = useState(null);
+  const [weather, setWeather] = useState<WeatherDataInterface>();
   const [location, setLocation] = useState<typeof locationSchema>();
   const [errorMsg, setErrorMsg] = useState("");
 

@@ -9,10 +9,11 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import { WeatherDataInterface } from "./LocationListScreen";
 
 export const SearchingLocationScreen = () => {
   const [location, setLocation] = useState("");
-  const [weather, setWeather] = useState("");
+  const [weather, setWeather] = useState<WeatherDataInterface>();
   const [value, setValue] = useState("");
 
   const getLocationWeather = () => {
@@ -46,7 +47,7 @@ export const SearchingLocationScreen = () => {
 
   return (
     <View style={styles.container}>
-      {!weather.error ? (
+      {!weather?.error ? (
         <>
           <View
             style={{
@@ -90,8 +91,8 @@ export const SearchingLocationScreen = () => {
             />
             <Text
               style={{ fontSize: 50 }}
-            >{`${weather.current?.temp_c} C`}</Text>
-            <Text>{weather.current?.condition.text}</Text>
+            >{`${weather?.current?.temp_c} C`}</Text>
+            <Text>{weather?.current?.condition.text}</Text>
             <Text>{`Wind: ${weather?.current?.wind_kph} k/h`}</Text>
           </View>
           <>

@@ -1,11 +1,11 @@
 import React from "react";
 import { Text, View, Image, StyleSheet } from "react-native";
 interface WeatherCardInterface {
-  icon: string;
-  city: string;
-  wind: string;
-  temperature: string;
-  condition: string;
+  icon: string | undefined;
+  city: string | undefined;
+  wind: string | undefined;
+  temperature: string | undefined;
+  condition: string | undefined;
 }
 
 export const WeatherCard = ({
