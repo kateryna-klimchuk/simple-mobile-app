@@ -9,7 +9,7 @@ const locationSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
 });
-export const PostsScreen = () => {
+export const CurrentLocationScreen = () => {
   const [weather, setWeather] = useState(null);
   const [location, setLocation] = useState<typeof locationSchema>();
   const [errorMsg, setErrorMsg] = useState("");
@@ -24,14 +24,16 @@ export const PostsScreen = () => {
   //   })();
   // }, []);
 
-  const getLocation = async () => {
-    const userLocation = await Location.getCurrentPositionAsync({});
-    console.log(userLocation.coords);
-  };
+  // const getLocation = async () => {
+  // //   const userLocation = await Location.getCurrentPositionAsync();
+  // //   console.log("current location", userLocation.coords);
+  // // };
 
-  const locat = getLocation();
+  // // const locat = getLocation();
 
-  // const searchParams = "duizel";
+  // // console.log("locat", locat);
+
+  const searchParams = "eindhoven";
   // const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${searchParams}`;
   const options = {
     method: "GET",
@@ -44,16 +46,17 @@ export const PostsScreen = () => {
   useEffect(() => {
     const getWeatherData = async () => {
       try {
-        // let { status } = await Location.requestForegroundPermissionsAsync();
-        // if (status !== "granted") {
-        //   setErrorMsg("Permission to access location was denied");
-        //   return;
-        // }
-        const userLocation = await Location.getCurrentPositionAsync({});
-        console.log("userLocation", userLocation);
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setErrorMsg("Permission to access location was denied");
+          return;
+        }
+        // const userLocation = await Location.getCurrentPositionAsync({});
+        // console.log("userLocation", userLocation);
 
-        const { latitude, longitude } = userLocation.coords;
-        const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${latitude}, ${longitude}`;
+        // const { latitude, longitude } = userLocation.coords;
+        // const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${latitude}, ${longitude}`;
+        const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${searchParams}`;
 
         const response = await fetch(url, options);
         const result = await response.json();

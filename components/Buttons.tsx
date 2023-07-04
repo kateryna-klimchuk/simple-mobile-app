@@ -24,21 +24,35 @@ const addButton = (props: {
     focused={props.focused}
   />
 );
-const userButton = (props: {
+
+const locationList = (props: {
   focused: boolean;
   color: string;
   size: number;
 }) => (
-  <Feather
-    name="user"
+  <AntDesign
+    name="bars"
     size={props.size}
     color={props.color}
     focused={props.focused}
   />
 );
+// const userButton = (props: {
+//   focused: boolean;
+//   color: string;
+//   size: number;
+// }) => (
+//   <Feather
+//     name="user"
+//     size={props.size}
+//     color={props.color}
+//     focused={props.focused}
+//   />
+// );
 
 export const Button = {
   location: locationButton,
   add: addButton,
-  user: userButton,
+  list: locationList,
+  // user: userButton,
 };

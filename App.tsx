@@ -5,9 +5,10 @@ import AppLoading from "expo-app-loading";
 import "react-native-url-polyfill/auto";
 import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { PostsScreen } from "./screens/mainScreens/PostsScreen";
-import { ProfileScreen } from "./screens/mainScreens/ProfileScreen";
+import { CurrentLocationScreen } from "./screens/mainScreens/CurrentLocationScreen";
+import { SearchingLocationScreen } from "./screens/mainScreens/SearchingLocationScreen";
 import { Button } from "./components/Buttons";
+import { LocationListScreen } from "./screens/mainScreens/LocationListScreen";
 
 const customFonts = {
   "Lora-regular": require("./assets/fonts/Lora-Regular.ttf"),
@@ -42,15 +43,22 @@ export default function App() {
           screenOptions={{ tabBarShowLabel: false, headerShown: false }}
         >
           <Tab.Screen
-            name="Posts"
-            component={PostsScreen}
+            name="CurrentLocation"
+            component={CurrentLocationScreen}
             options={{
               tabBarIcon: (props) => Button.location(props),
             }}
           />
           <Tab.Screen
-            name="Profile"
-            component={ProfileScreen}
+            name="LocationList"
+            component={LocationListScreen}
+            options={{
+              tabBarIcon: (props) => Button.list(props),
+            }}
+          />
+          <Tab.Screen
+            name="SearchingLocation"
+            component={SearchingLocationScreen}
             options={{
               tabBarIcon: (props) => Button.add(props),
             }}

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-// import * as Location from "expo-location";
 import { Entypo } from "@expo/vector-icons";
 import {
   Text,
@@ -11,25 +10,13 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-export const ProfileScreen = () => {
+export const SearchingLocationScreen = () => {
   const [location, setLocation] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
   const [weather, setWeather] = useState("");
   const [value, setValue] = useState("");
 
-  // useEffect(() => {
-  //   (async () => {
-  //     let { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== "granted") {
-  //       setErrorMsg("Permission to access location was denied");
-  //       return;
-  //     }
-  //   })();
-  // }, []);
-
   const getLocationWeather = () => {
     setValue(location);
-    console.log(value);
   };
 
   useEffect(() => {
