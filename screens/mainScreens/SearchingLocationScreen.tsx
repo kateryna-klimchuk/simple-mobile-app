@@ -10,14 +10,25 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { WeatherDataInterface } from "./LocationListScreen";
+import { WeatherApiIcon } from "../../components/WeatherApiIcon";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 
-export const SearchingLocationScreen = () => {
+export const SearchingLocationScreen = ({ navigation }: any) => {
   const [location, setLocation] = useState("");
   const [weather, setWeather] = useState<WeatherDataInterface>();
   const [value, setValue] = useState("");
 
   const getLocationWeather = () => {
     setValue(location);
+  };
+
+  const addToFavorite = () => {
+    navigation.navigate("LocationList", {
+      weather,
+    });
+
+    setWeather(undefined);
+    setValue("");
   };
 
   useEffect(() => {
@@ -47,6 +58,8 @@ export const SearchingLocationScreen = () => {
 
   return (
     <View style={styles.container}>
+      <WeatherApiIcon />
+
       {!weather?.error ? (
         <>
           <View
@@ -57,13 +70,6 @@ export const SearchingLocationScreen = () => {
               marginTop: 10,
             }}
           >
-            <Image
-              style={{ width: 220, height: 100, marginTop: 100 }}
-              source={{
-                uri: "https://cdn.weatherapi.com/v4/images/weatherapi_logo.png",
-              }}
-            />
-
             <View
               style={{
                 flexDirection: "row",
@@ -95,89 +101,34 @@ export const SearchingLocationScreen = () => {
             <Text>{weather?.current?.condition.text}</Text>
             <Text>{`Wind: ${weather?.current?.wind_kph} k/h`}</Text>
           </View>
-          <>
-            <Text
-              style={{
-                paddingBottom: 4,
-                marginLeft: 10,
-                alignSelf: "flex-start",
-              }}
-            >
-              Choose another place:
-            </Text>
-            <View
-              style={{
-                flexDirection: "row",
-                columnGap: 4,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Entypo
-                name="location-pin"
-                size={28}
-                color="#228b22"
-                style={{ marginTop: 16 }}
-              />
+          <TouchableOpacity
+            onPress={addToFavorite}
+            style={styles.sendContainer}
+          >
+            <Text style={styles.publishBtn}>Add to favorite</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <>
+          <View style={{ marginHorizontal: 10, marginTop: 20 }}>
+            <View style={styles.inputContainer}>
+              <Entypo name="location-pin" size={28} color="#228b22" />
+
               <TextInput
                 style={styles.input}
-                value={location}
                 autoCapitalize="none"
+                value={location}
                 onChangeText={(value) => setLocation(value)}
+                placeholder="Search for a city"
               />
             </View>
             <TouchableOpacity
               onPress={getLocationWeather}
-              style={{ ...styles.sendContainer, marginBottom: 10 }}
+              style={styles.sendContainer}
             >
               <Text style={styles.publishBtn}>Search</Text>
             </TouchableOpacity>
-          </>
-        </>
-      ) : (
-        <>
-          <Image
-            style={{
-              width: 220,
-              height: 100,
-              alignSelf: "center",
-              marginTop: 100,
-            }}
-            source={{
-              uri: "https://cdn.weatherapi.com/v4/images/weatherapi_logo.png",
-            }}
-          />
-          <Text style={{ paddingBottom: 4, marginTop: 30, marginLeft: 10 }}>
-            Choose a place:
-          </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              columnGap: 4,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Entypo
-              name="location-pin"
-              size={28}
-              color="#228b22"
-              style={{ marginTop: 16 }}
-            />
-
-            <TextInput
-              style={styles.input}
-              autoCapitalize="none"
-              value={location}
-              onChangeText={(value) => setLocation(value)}
-            />
           </View>
-          <TouchableOpacity
-            onPress={getLocationWeather}
-            style={styles.sendContainer}
-          >
-            <Text style={styles.publishBtn}>Search</Text>
-          </TouchableOpacity>
         </>
       )}
     </View>
@@ -188,22 +139,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "flex-start",
-    marginLeft: 10,
-    marginRight: 10,
   },
   text: {
     color: "blue",
     fontSize: 22,
   },
+  inputContainer: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderColor: "#000",
+    paddingBottom: 10,
+  },
   input: {
-    height: 40,
-    width: "92%",
-    borderColor: "#dcdcdc",
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    borderRadius: 4,
-    backgroundColor: "#f8f8ff",
-    marginTop: 20,
+    flex: 1,
   },
   sendContainer: {
     backgroundColor: "#228b22",

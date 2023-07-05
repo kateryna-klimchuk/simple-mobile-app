@@ -5,6 +5,7 @@ import { AntDesign } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { z } from "zod";
 import { WeatherDataInterface } from "./LocationListScreen";
+import { WeatherApiIcon } from "../../components/WeatherApiIcon";
 
 const locationSchema = z.object({
   latitude: z.number(),
@@ -74,12 +75,8 @@ export const CurrentLocationScreen = () => {
     <View style={styles.container}>
       {weather ? (
         <>
-          <Image
-            style={{ width: 220, height: 100, marginTop: 100 }}
-            source={{
-              uri: "https://cdn.weatherapi.com/v4/images/weatherapi_logo.png",
-            }}
-          />
+          <WeatherApiIcon />
+
           <View
             style={{
               flexDirection: "row",
@@ -102,24 +99,12 @@ export const CurrentLocationScreen = () => {
               marginTop: 10,
             }}
             source={{
-              uri: `https:${weather?.["current"]?.["condition"].icon}`,
+              uri: `https:${weather?.current?.condition.icon}`,
             }}
           />
           <Text style={{ fontSize: 50 }}>{`${weather.current?.temp_c} C`}</Text>
           <Text>{weather.current?.condition.text}</Text>
           <Text>{`Wind: ${weather.current.wind_kph} k/h`}</Text>
-          <View
-            style={{
-              flexDirection: "row",
-              marginTop: 170,
-              justifyContent: "center",
-              alignItems: "center",
-              columnGap: 10,
-            }}
-          >
-            <Text style={{}}>Change location? Press</Text>
-            <AntDesign name="plussquareo" size={24} color="gray" />
-          </View>
         </>
       ) : (
         <Text>Nothing to show</Text>
@@ -133,6 +118,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start",
-    marginTop: 10,
   },
 });

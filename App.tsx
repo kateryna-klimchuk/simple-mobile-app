@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import * as Font from "expo-font";
 import AppLoading from "expo-app-loading";
 import "react-native-url-polyfill/auto";
@@ -19,6 +19,15 @@ const customFonts = {
 
 const Tab = createBottomTabNavigator();
 
+const MyTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: "#228b22",
+    background: "#f0fff0",
+    card: "#f0fff0",
+  },
+};
 const loadApplication = async () => {
   await Font.loadAsync(customFonts);
 };
@@ -37,7 +46,7 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={MyTheme}>
       <View style={{ flex: 1 }}>
         <Tab.Navigator
           screenOptions={{ tabBarShowLabel: false, headerShown: false }}
@@ -50,17 +59,17 @@ export default function App() {
             }}
           />
           <Tab.Screen
-            name="LocationList"
-            component={LocationListScreen}
-            options={{
-              tabBarIcon: (props) => Button.list(props),
-            }}
-          />
-          <Tab.Screen
             name="SearchingLocation"
             component={SearchingLocationScreen}
             options={{
               tabBarIcon: (props) => Button.add(props),
+            }}
+          />
+          <Tab.Screen
+            name="LocationList"
+            component={LocationListScreen}
+            options={{
+              tabBarIcon: (props) => Button.list(props),
             }}
           />
         </Tab.Navigator>

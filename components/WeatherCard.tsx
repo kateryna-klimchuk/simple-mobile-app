@@ -1,6 +1,7 @@
 import React from "react";
-import { Text, View, Image, StyleSheet } from "react-native";
-interface WeatherCardInterface {
+import { Text, View, Image, ImageBackground, StyleSheet } from "react-native";
+export interface WeatherCardInterface {
+  // id: any;
   icon: string | undefined;
   city: string | undefined;
   wind: string | undefined;
@@ -16,43 +17,58 @@ export const WeatherCard = ({
   condition,
 }: WeatherCardInterface) => {
   return (
-    <View style={{}}>
-      <View
+    <View
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+      }}
+    >
+      <ImageBackground
+        source={require("../assets/wetherSky.jpg")}
         style={{
-          flexDirection: "row",
-          columnGap: 4,
-          width: 300,
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "center",
+          borderRadius: 10,
+          marginHorizontal: 10,
+          overflow: "hidden",
         }}
       >
-        <Text style={{ fontSize: 24 }}>{city}</Text>
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          columnGap: 14,
-        }}
-      >
-        <Image
+        <View
           style={{
-            width: 120,
-            height: 120,
-            marginTop: 10,
+            flexDirection: "row",
+            columnGap: 4,
+            width: "100%",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "center",
           }}
-          source={{
-            uri: `https:${icon}`,
-          }}
-        />
-        <View>
-          <Text style={{ fontSize: 50 }}>{`${temperature} C`}</Text>
-          <Text>{condition}</Text>
-          <Text>{`Wind: ${wind} k/h`}</Text>
+        >
+          <Text style={{ fontSize: 24 }}>{city}</Text>
         </View>
-      </View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            columnGap: 14,
+          }}
+        >
+          <Image
+            style={{
+              width: 100,
+              height: 100,
+              marginTop: 10,
+            }}
+            source={{
+              uri: `https:${icon}`,
+            }}
+          />
+          <View>
+            <Text style={{ fontSize: 24 }}>{`${temperature} C`}</Text>
+            <Text>{condition}</Text>
+            <Text>{`Wind: ${wind} k/h`}</Text>
+          </View>
+        </View>
+      </ImageBackground>
     </View>
   );
 };
